@@ -1,0 +1,877 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura App · Propuesta Técnica y Estratégica</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11; --bg2: #161719; --bg3: #1e2023;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0f0ee; --text2: #9a9a96; --text3: #5c5c58;
+    --teal: #1fcf8a; --teal-dim: rgba(31,207,138,0.12);
+    --blue: #4da8f5; --blue-dim: rgba(77,168,245,0.12);
+    --amber: #f5a623; --amber-dim: rgba(245,166,35,0.12);
+    --coral: #f5705a; --coral-dim: rgba(245,112,90,0.12);
+    --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+  .layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar { width: 248px; background: var(--bg2); border-right: 1px solid var(--border); padding: 2rem 1.25rem; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; gap: 0.25rem; overflow-y: auto; }
+  .main { margin-left: 248px; flex: 1; padding: 2.5rem 3rem; max-width: 880px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .logo-dot { width: 28px; height: 28px; background: var(--teal); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-dot svg { width: 14px; height: 14px; }
+  .logo-text { font-size: 14px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; padding: 0 0.5rem; margin-top: 1.25rem; margin-bottom: 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--teal-dim); color: var(--teal); }
+  .sidebar-footer { margin-top: auto; padding: 1rem 0.5rem 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  /* PAGE */
+  .page-header { margin-bottom: 2.5rem; }
+  .page-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--teal); background: var(--teal-dim); padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; letter-spacing: 0.04em; }
+  .page-tag-dot { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; }
+  .page-title { font-size: 32px; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .page-sub { font-size: 15px; color: var(--text2); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+  .section-gap { margin-bottom: 2.5rem; }
+
+  /* CARDS */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 0.75rem; }
+  .card-icon { width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .card-title { font-size: 15px; font-weight: 500; color: var(--text); }
+  .card-sub { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+  .metric-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+
+  /* INFRA */
+  .infra-block { background: var(--bg3); border: 1px solid var(--border2); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .infra-title { font-size: 12px; font-weight: 600; color: var(--teal); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.75rem; }
+  .infra-spec { display: flex; justify-content: space-between; align-items: center; padding: 0.45rem 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .infra-spec:last-child { border-bottom: none; }
+  .infra-key { color: var(--text2); }
+  .infra-val { color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; }
+
+  /* CHECKLIST */
+  .checklist { list-style: none; }
+  .checklist li { display: flex; align-items: flex-start; gap: 12px; padding: 0.75rem 0; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); line-height: 1.5; }
+  .checklist li:last-child { border-bottom: none; }
+  .check-dot { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; font-size: 11px; font-weight: 600; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 10px; bottom: 10px; width: 1px; background: var(--border2); }
+  .tl-item { position: relative; margin-bottom: 1.75rem; }
+  .tl-dot { position: absolute; left: -2rem; top: 5px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+  .tl-week { font-size: 11px; font-weight: 500; color: var(--text3); margin-bottom: 3px; font-family: 'DM Mono', monospace; }
+  .tl-title { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .tl-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .tl-tag { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: 100px; margin-top: 6px; margin-right: 4px; }
+
+  /* ALERTS */
+  .alert { border-radius: 10px; padding: 0.875rem 1rem; font-size: 13px; margin-bottom: 1rem; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+  .alert-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .alert-teal  { background: var(--teal-dim);  color: var(--teal);  border: 1px solid rgba(31,207,138,0.2); }
+  .alert-coral { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(245,112,90,0.2); }
+  .alert-blue  { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(77,168,245,0.2); }
+
+  /* BADGES */
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 100px; margin-right: 4px; margin-top: 4px; }
+  .badge-teal   { background: var(--teal-dim);   color: var(--teal); }
+  .badge-blue   { background: var(--blue-dim);   color: var(--blue); }
+  .badge-amber  { background: var(--amber-dim);  color: var(--amber); }
+  .badge-coral  { background: var(--coral-dim);  color: var(--coral); }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); }
+
+  /* TEAM */
+  .team-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; display: flex; gap: 1rem; align-items: flex-start; }
+  .avatar { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 15px; flex-shrink: 0; }
+  .team-name { font-size: 15px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .team-role { font-size: 12px; color: var(--text3); margin-bottom: 8px; }
+  .team-desc { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+  /* OWNERSHIP GRID */
+  .own-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.75rem; }
+  .own-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 0.875rem; }
+  .own-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .own-label { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .own-desc  { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+  /* CLAUSE */
+  .clause { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .clause-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.625rem; }
+  .clause-num { font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text3); background: var(--bg3); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.06em; }
+  .clause-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .clause-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+  /* INFO ROWS */
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.625rem 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--text2); }
+  .info-value { color: var(--text); font-weight: 500; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .info-value.green { color: var(--teal); }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-dot">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#0e0f11" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="#0e0f11"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Aura App</div>
+        <div class="logo-sub">Propuesta técnica</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Secciones</div>
+    <button class="nav-item active" onclick="showSection('resumen', this)"><span>◈</span> Resumen ejecutivo</button>
+    <button class="nav-item" onclick="showSection('ownership', this)"><span>⬡</span> Control y propiedad</button>
+    <button class="nav-item" onclick="showSection('infraestructura', this)"><span>☁</span> Infraestructura</button>
+    <button class="nav-item" onclick="showSection('plan', this)"><span>→</span> Plan de transición</button>
+    <button class="nav-item" onclick="showSection('dependencias', this)"><span>⊞</span> Dependencias</button>
+    <button class="nav-item" onclick="showSection('consideraciones', this)"><span>≡</span> Consideraciones técnicas</button>
+    <button class="nav-item" onclick="showSection('equipo', this)"><span>◎</span> Equipo y roles</button>
+    <button class="nav-item" onclick="showSection('metodologia', this)"><span>⚙</span> Metodología</button>
+
+    <div class="sidebar-footer">
+      Preparado por Juan<br>
+      Para Estefania Aristu · Mayo 2026<br><br>
+      Documento técnico · Uso interno
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ══════════════════════════════════════
+         1 · RESUMEN EJECUTIVO
+    ══════════════════════════════════════ -->
+    <div id="sec-resumen" class="section active">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Propuesta técnica · Mayo 2026</div>
+        <div class="page-title">Transición tecnológica<br>de Aura App</div>
+        <div class="page-sub">Un plan ordenado para recuperar el control completo de la plataforma, sin interrupciones operativas y con continuidad garantizada.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Indicadores del proceso</div>
+        <div class="grid3">
+          <div class="metric">
+            <div class="metric-label">Tiempo de inactividad</div>
+            <div class="metric-value" style="color:var(--teal);">0</div>
+            <div class="metric-sub">días · migración en paralelo</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Duración estimada</div>
+            <div class="metric-value">~6 sem</div>
+            <div class="metric-sub">proceso completo · sujeto a auditoría</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Etapas del plan</div>
+            <div class="metric-value">5</div>
+            <div class="metric-sub">fases definidas y secuenciadas</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Objetivos estratégicos del proyecto</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Recuperación del ownership tecnológico</strong> — código, infraestructura, cuentas y datos bajo control directo de Aura</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Continuidad operativa total</strong> — la plataforma permanece activa y funcional durante todo el proceso de transición</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Independencia de proveedores externos</strong> — eliminación de dependencias operativas con terceros para el funcionamiento de la plataforma</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Profesionalización del modelo operativo</strong> — equipo técnico dedicado con procesos, roles y metodología definidos</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Escalabilidad estructural</strong> — infraestructura cloud diseñada para crecer con la plataforma sin rediseño arquitectural</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div><strong>Transparencia operativa</strong> — visibilidad total del estado técnico, accesos y procesos en todo momento</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Modelo operativo en tres etapas</div>
+        <div class="grid3">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Etapa 1</div>
+            <div class="card-title" style="margin-bottom:0.5rem;">Transición e independencia</div>
+            <div class="card-sub">Auditoría técnica, configuración de entorno propio, migración completa de datos e infraestructura, y corte definitivo validado por QA.</div>
+            <div style="margin-top:0.75rem;"><span class="badge badge-teal">Único · 4–6 semanas</span></div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--blue); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Etapa 2</div>
+            <div class="card-title" style="margin-bottom:0.5rem;">Operación continua</div>
+            <div class="card-sub">Mantenimiento mensual: monitoreo del servidor, corrección de bugs, actualizaciones de seguridad y soporte técnico operativo dedicado.</div>
+            <div style="margin-top:0.75rem;"><span class="badge badge-blue">Mensual · Recurrente</span></div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--amber); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Etapa 3</div>
+            <div class="card-title" style="margin-bottom:0.5rem;">Evolución del producto</div>
+            <div class="card-sub">Desarrollo de nuevas funcionalidades y mejoras según prioridades del negocio. Alcance y estimación definidos y aprobados antes de cada ejecución.</div>
+            <div style="margin-top:0.75rem;"><span class="badge badge-amber">Por demanda</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Principios del modelo</div>
+        <div class="grid2">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Migración paralela controlada</div>
+            <div class="card-sub">El entorno actual permanece activo como respaldo de seguridad durante todo el proceso. El corte definitivo ocurre únicamente con validación QA completa y aprobación explícita.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--blue); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Auditoría antes que ejecución</div>
+            <div class="card-sub">Ninguna decisión técnica crítica se toma sin revisión previa del código e infraestructura recibidos. El diagnóstico inicial define el roadmap definitivo.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--amber); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Aprobación antes de ejecución</div>
+            <div class="card-sub">Toda acción que impacte la plataforma en producción requiere validación QA y aprobación explícita de Aura. Sin excepción.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--purple); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Ownership desde el primer día</div>
+            <div class="card-sub">Todos los activos — código, infraestructura, cuentas, dominio — quedan registrados y administrados directamente por Aura desde el inicio del proceso.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         2 · CONTROL Y PROPIEDAD
+    ══════════════════════════════════════ -->
+    <div id="sec-ownership" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Independencia tecnológica · Activo estratégico</div>
+        <div class="page-title">Control y propiedad<br>de la plataforma</div>
+        <div class="page-sub">Al finalizar la transición, Aura tiene el control operativo y legal completo de cada componente de su producto. Sin dependencias externas.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Activos bajo propiedad directa de Aura</div>
+        <div class="own-grid">
+          <div class="own-item">
+            <div class="own-icon">⬡</div>
+            <div>
+              <div class="own-label">Repositorios Git</div>
+              <div class="own-desc">Todo el código fuente alojado bajo la cuenta de Aura. Control total de versiones, historial de cambios y gestión de accesos.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">☁</div>
+            <div>
+              <div class="own-label">Infraestructura cloud</div>
+              <div class="own-desc">Servidor, bases de datos y entornos cloud registrados directamente a nombre de Aura. Sin intermediarios técnicos ni administrativos.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">◉</div>
+            <div>
+              <div class="own-label">Stores mobile</div>
+              <div class="own-desc">Cuentas de App Store (iOS) y Google Play (Android) bajo titularidad de Aura. El equipo técnico opera como colaborador autorizado, no como propietario.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">◈</div>
+            <div>
+              <div class="own-label">Dominio y DNS</div>
+              <div class="own-desc">Dominio registrado a nombre de Aura con control directo de la configuración DNS. Sin dependencias de proveedores para modificaciones críticas.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">⊞</div>
+            <div>
+              <div class="own-label">Backups independientes</div>
+              <div class="own-desc">Política de respaldos periódicos almacenados en infraestructura propia de Aura. Recuperación ante desastres sin dependencia de terceros.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">⊕</div>
+            <div>
+              <div class="own-label">Accesos administrativos</div>
+              <div class="own-desc">Credenciales administrativas centralizadas bajo custodia de Aura. Gestión de accesos del equipo técnico como colaboradores delegados.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Modelo de colaboración técnica</div>
+        <div class="card">
+          <div style="font-size:13px; color:var(--text2); line-height:1.8; margin-bottom:1rem;">
+            El equipo técnico opera con accesos de colaborador en todos los sistemas, nunca como propietario de los activos. Este principio garantiza que ante cualquier cambio de equipo, expansión o auditoría externa, <strong style="color:var(--text);">Aura retiene el control total</strong> sin negociaciones adicionales ni procesos de transferencia.
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+            <span class="badge badge-teal">Git · Acceso colaborador</span>
+            <span class="badge badge-teal">Cloud · IAM delegado</span>
+            <span class="badge badge-teal">App Store · Rol developer</span>
+            <span class="badge badge-teal">Play Store · Rol developer</span>
+            <span class="badge badge-teal">DNS · Acceso delegado</span>
+            <span class="badge badge-teal">Backups · Repositorio de Aura</span>
+          </div>
+        </div>
+        <div class="alert alert-teal">
+          <span>✓</span>
+          <span>Esta estructura garantiza <strong>continuidad operativa total</strong> ante cualquier escenario futuro: cambio de equipo técnico, proceso de due diligence, auditoría externa, o expansión con nuevos integrantes.</span>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Independencia operativa</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>La plataforma puede operar, actualizarse y escalar sin requerir intervención de ningún proveedor externo</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>El código fuente está disponible en todo momento, documentado y bajo control de versiones propio</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>La infraestructura cloud está diseñada para no generar lock-in: puede migrarse o replicarse sin dependencias propietarias</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>El equipo técnico puede expandirse o reemplazarse sin impacto en el acceso de Aura a sus propios activos</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         3 · INFRAESTRUCTURA
+    ══════════════════════════════════════ -->
+    <div id="sec-infraestructura" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Entorno cloud · Propiedad de Aura</div>
+        <div class="page-title">Infraestructura técnica</div>
+        <div class="page-sub">Configuración inicial sugerida y arquitectura tecnológica preliminar identificada. Sujeta a validación durante la auditoría técnica inicial.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Stack tecnológico · Identificado preliminarmente</div>
+        <div class="grid2">
+          <div class="infra-block">
+            <div class="infra-title">📱 Componente mobile</div>
+            <div class="infra-spec"><span class="infra-key">Framework identificado</span><span class="infra-val">React Native (preliminar)</span></div>
+            <div class="infra-spec"><span class="infra-key">Plataformas</span><span class="infra-val">iOS + Android</span></div>
+            <div class="infra-spec"><span class="infra-key">Distribución</span><span class="infra-val">App Store + Play Store</span></div>
+            <div class="infra-spec"><span class="infra-key">Estado</span><span class="infra-val">Pendiente de auditoría</span></div>
+          </div>
+          <div class="infra-block">
+            <div class="infra-title">🌐 Componente web</div>
+            <div class="infra-spec"><span class="infra-key">CMS identificado</span><span class="infra-val">WordPress (preliminar)</span></div>
+            <div class="infra-spec"><span class="infra-key">Backend</span><span class="infra-val">A confirmar en auditoría</span></div>
+            <div class="infra-spec"><span class="infra-key">Base de datos</span><span class="infra-val">A confirmar en auditoría</span></div>
+            <div class="infra-spec"><span class="infra-key">Estado</span><span class="infra-val">Pendiente de auditoría</span></div>
+          </div>
+        </div>
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          <span>El stack definitivo se confirmará durante la <strong>auditoría técnica inicial</strong>, una vez recibido el código fuente completo. Las tecnologías indicadas son preliminares y están sujetas a modificación según lo que se encuentre en la revisión del código entregado.</span>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Infraestructura destino · Configuración inicial sugerida</div>
+        <div class="infra-block">
+          <div class="infra-title">☁ Entorno cloud propuesto · DigitalOcean</div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0 2rem;">
+            <div class="infra-spec"><span class="infra-key">Sistema operativo</span><span class="infra-val">Ubuntu LTS</span></div>
+            <div class="infra-spec"><span class="infra-key">CPU (estimado inicial)</span><span class="infra-val">4 vCPU</span></div>
+            <div class="infra-spec"><span class="infra-key">RAM (estimado inicial)</span><span class="infra-val">8 GB</span></div>
+            <div class="infra-spec"><span class="infra-key">Almacenamiento</span><span class="infra-val">SSD · ajustable</span></div>
+            <div class="infra-spec"><span class="infra-key">Regiones disponibles</span><span class="infra-val">NY · Amsterdam · Singapur</span></div>
+            <div class="infra-spec"><span class="infra-key">Escalabilidad</span><span class="infra-val">Vertical y horizontal</span></div>
+            <div class="infra-spec"><span class="infra-key">SSL</span><span class="infra-val">Let's Encrypt · gratuito</span></div>
+            <div class="infra-spec"><span class="infra-key">Backups automáticos</span><span class="infra-val">Disponibles · configurables</span></div>
+          </div>
+        </div>
+        <div class="alert alert-teal">
+          <span>◈</span>
+          <span>La configuración inicial es una <strong>estimación de partida escalable</strong>. Los recursos se ajustan según tráfico real, volumen de usuarios, almacenamiento requerido e integraciones activas. El equipo técnico monitorea y recomienda ajustes de capacidad de forma continua.</span>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Criterios de escalabilidad</div>
+        <div class="grid2">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--blue); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Escalabilidad vertical</div>
+            <div class="card-sub">Los recursos del servidor (CPU, RAM, almacenamiento) pueden aumentarse sin migración. La arquitectura cloud lo permite de forma no disruptiva.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Escalabilidad horizontal</div>
+            <div class="card-sub">La plataforma puede distribuirse en múltiples regiones según demanda geográfica. Preparada para expansión internacional sin rediseño arquitectural.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Preguntas técnicas a resolver en auditoría</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Lenguaje y framework del backend (Node.js, Python, PHP/Laravel u otro)</div></li>
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Motor de base de datos en uso (PostgreSQL, MySQL, MongoDB u otro)</div></li>
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Proveedor cloud actual e infraestructura de hosting en producción</div></li>
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Uso de contenedores Docker o instalación manual en servidor</div></li>
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Disponibilidad de certificados de firma para builds de App Store y Play Store</div></li>
+            <li><div class="check-dot" style="background:var(--coral-dim); color:var(--coral);">?</div><div>Integraciones activas con servicios externos y estado de sus credenciales</div></li>
+          </ul>
+        </div>
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          Estas definiciones son necesarias para cerrar el alcance técnico definitivo del proceso. Se resuelven durante la auditoría inicial, antes de comenzar la migración.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         4 · PLAN DE TRANSICIÓN
+    ══════════════════════════════════════ -->
+    <div id="sec-plan" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Migración paralela controlada</div>
+        <div class="page-title">Plan de transición</div>
+        <div class="page-sub">El entorno actual permanece activo como respaldo durante todo el proceso. El corte definitivo ocurre únicamente con validación QA completa.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="grid3">
+          <div class="metric"><div class="metric-label">Duración estimada</div><div class="metric-value">~6 sem</div><div class="metric-sub">sujeto a complejidad técnica</div></div>
+          <div class="metric"><div class="metric-label">Tiempo offline</div><div class="metric-value" style="color:var(--teal);">0</div><div class="metric-sub">días · operación continua</div></div>
+          <div class="metric"><div class="metric-label">Etapas</div><div class="metric-value">5</div><div class="metric-sub">fases secuenciadas</div></div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Roadmap de transición · 5 etapas</div>
+        <div class="timeline">
+
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--blue); background:var(--bg);"></div>
+            <div class="tl-week">Etapa 1 · Previa al inicio</div>
+            <div class="tl-title">Auditoría técnica del estado actual</div>
+            <div class="tl-desc">El equipo técnico realiza una revisión completa de la plataforma en producción tal como se encuentra: funcionalidad, rendimiento, integraciones activas e identificación de issues conocidos. Se documenta el estado de base previo a cualquier intervención. Esta etapa es condición necesaria para definir el alcance técnico definitivo de la transición.</div>
+            <div><span class="tl-tag" style="background:var(--blue-dim); color:var(--blue);">Juan + QA</span><span class="tl-tag" style="background:var(--bg3); color:var(--text3);">Requisito previo</span></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--blue); background:var(--bg);"></div>
+            <div class="tl-week">Etapa 2 · Semana 1</div>
+            <div class="tl-title">Recepción de activos y análisis técnico profundo</div>
+            <div class="tl-desc">Recepción del repositorio completo de código fuente, backup de base de datos, credenciales y documentación técnica disponible. El equipo técnico realiza el análisis completo de la arquitectura: dependencias, endpoints, estructura de datos, integraciones activas y estado del código. Con base en este análisis se confirma el plan técnico definitivo y se detecta posible deuda técnica a gestionar.</div>
+            <div><span class="tl-tag" style="background:var(--blue-dim); color:var(--blue);">Juan</span><span class="tl-tag" style="background:var(--bg3); color:var(--text3);">Stack confirmado en esta etapa</span></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--teal); background:var(--bg);"></div>
+            <div class="tl-week">Etapa 3 · Semana 2</div>
+            <div class="tl-title">Configuración del entorno cloud propio</div>
+            <div class="tl-desc">Configuración completa del entorno cloud en DigitalOcean bajo propiedad directa de Aura: servidor, base de datos, entorno de staging, DNS preliminar, certificados SSL y backups automáticos. La plataforma actual permanece activa sin ninguna interrupción para los usuarios finales durante esta etapa.</div>
+            <div><span class="tl-tag" style="background:var(--teal-dim); color:var(--teal);">Juan</span><span class="tl-tag" style="background:var(--bg3); color:var(--text3);">DigitalOcean · Ubuntu LTS</span></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--teal); background:var(--bg);"></div>
+            <div class="tl-week">Etapa 4 · Semanas 3–4</div>
+            <div class="tl-title">Migración y validación QA en paralelo</div>
+            <div class="tl-desc">Instalación y configuración completa de la plataforma en el nuevo entorno cloud. El QA Tester ejecuta un ciclo de validación completo: funcionalidad, rendimiento, integraciones, regresión y estabilidad. El entorno actual permanece activo como respaldo durante todo este proceso, sin riesgo operativo para los usuarios.</div>
+            <div><span class="tl-tag" style="background:var(--teal-dim); color:var(--teal);">Juan + QA</span><span class="tl-tag" style="background:var(--bg3); color:var(--text3);">Entorno anterior activo como respaldo</span></div>
+          </div>
+
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--amber); background:var(--bg);"></div>
+            <div class="tl-week">Etapa 5 · Semana 5</div>
+            <div class="tl-title">Corte definitivo e independencia operativa total</div>
+            <div class="tl-desc">Con validación QA completada y aprobación formal de Aura, se ejecuta el corte definitivo: redireccionamiento del dominio al nuevo entorno cloud propio y cierre del entorno anterior. La plataforma Aura pasa a operar de forma completamente independiente bajo infraestructura y accesos propios.</div>
+            <div><span class="tl-tag" style="background:var(--amber-dim); color:var(--amber);">Hito estratégico</span><span class="tl-tag" style="background:var(--teal-dim); color:var(--teal);">Ownership total · Día 1</span></div>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          <strong>Principio operativo central:</strong> el entorno actual nunca se desactiva hasta que el nuevo esté validado al 100% por QA y con aprobación explícita de Aura. La continuidad operativa es no negociable.
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Período de operación continua · Post-transición</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--purple-dim);">⟳</div>
+            <div><div class="card-title">Mantenimiento técnico mensual</div><div class="card-sub">Operación continua y sostenida de la plataforma post-transición.</div></div>
+          </div>
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--purple-dim); color:var(--purple);">✓</div><div>Monitoreo continuo del servidor y servicios críticos</div></li>
+            <li><div class="check-dot" style="background:var(--purple-dim); color:var(--purple);">✓</div><div>Corrección de bugs detectados en producción</div></li>
+            <li><div class="check-dot" style="background:var(--purple-dim); color:var(--purple);">✓</div><div>Actualizaciones de seguridad y dependencias</div></li>
+            <li><div class="check-dot" style="background:var(--purple-dim); color:var(--purple);">✓</div><div>Revisión periódica de performance y estabilidad</div></li>
+            <li><div class="check-dot" style="background:var(--purple-dim); color:var(--purple);">✓</div><div>Soporte técnico operativo con horas dedicadas mensualmente</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         5 · DEPENDENCIAS
+    ══════════════════════════════════════ -->
+    <div id="sec-dependencias" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Condiciones de inicio · Activos requeridos</div>
+        <div class="page-title">Dependencias para<br>la transición</div>
+        <div class="page-sub">La correcta ejecución de la transición depende de la disponibilidad y entrega completa de los siguientes activos técnicos.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="alert alert-blue">
+          <span>ℹ</span>
+          <span>El código fuente y los activos digitales son propiedad legal de Aura. El proveedor actual está contractualmente obligado a entregar la totalidad de los activos aquí listados. Los plazos y el alcance de la transición están directamente condicionados a la disponibilidad y calidad de esta entrega.</span>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Código e infraestructura</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">1</div><div><strong>Repositorio completo del código fuente</strong> — acceso Git con historial de commits completo de todos los componentes (mobile, backend, frontend)</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">2</div><div><strong>Backup completo de la base de datos</strong> — dump actualizado con la totalidad de los datos de producción: usuarios, registros y configuraciones</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">3</div><div><strong>Variables de entorno y configuraciones (.env)</strong> — todas las API keys, tokens de autenticación y parámetros de configuración del sistema</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">4</div><div><strong>Documentación técnica disponible</strong> — arquitectura del sistema, endpoints de API, estructura de base de datos, diagrama de integraciones</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Cuentas y accesos</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">5</div><div><strong>Acceso a Google Play Store</strong> — transferencia o habilitación de acceso a la cuenta de publicación Android asociada a Aura</div></li>
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">6</div><div><strong>Acceso a Apple App Store</strong> — transferencia o habilitación de acceso a la cuenta de publicación iOS asociada a Aura</div></li>
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">7</div><div><strong>Credenciales de notificaciones push</strong> — configuración y acceso al servicio activo (Firebase, OneSignal u otro)</div></li>
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">8</div><div><strong>Credenciales del sistema de autenticación</strong> — configuración de Firebase Auth, Auth0, JWT u otro servicio de autenticación en uso</div></li>
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">9</div><div><strong>Acceso a herramientas de analítica</strong> — panel de Google Analytics u otros servicios de métricas configurados, con datos históricos</div></li>
+            <li><div class="check-dot" style="background:var(--blue-dim); color:var(--blue);">10</div><div><strong>Certificados de firma de aplicaciones</strong> — keystores de Android y certificados de firma iOS necesarios para publicar actualizaciones en stores</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Condiciones de transición</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--amber-dim); color:var(--amber);">11</div><div><strong>Continuidad del entorno actual durante la migración</strong> — la plataforma debe permanecer operativa en su entorno actual mientras se configura y valida el nuevo entorno propio</div></li>
+            <li><div class="check-dot" style="background:var(--amber-dim); color:var(--amber);">12</div><div><strong>Disponibilidad para consultas técnicas</strong> — canal de comunicación con el equipo técnico del proveedor actual para resolver dudas sobre la arquitectura durante el período de transición</div></li>
+          </ul>
+        </div>
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          <span>La entrega incompleta o demorada de cualquiera de los activos aquí listados afectará directamente los plazos de la transición. El equipo técnico notificará por escrito cualquier bloqueo operativo originado por disponibilidad de accesos.</span>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         6 · CONSIDERACIONES TÉCNICAS
+    ══════════════════════════════════════ -->
+    <div id="sec-consideraciones" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Marco técnico · Gestión de riesgos</div>
+        <div class="page-title">Consideraciones técnicas</div>
+        <div class="page-sub">Condiciones y variables técnicas que pueden afectar el alcance o los plazos del proyecto. Documentadas para transparencia operativa de todas las partes.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Condiciones de alcance y ejecución</div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 01</span>
+            <span class="clause-title">Auditoría técnica y redefinición de alcance</span>
+          </div>
+          <div class="clause-body">
+            Antes de iniciar cualquier intervención sobre la plataforma, el equipo técnico realizará una auditoría completa del código e infraestructura recibidos. Si durante esta revisión se identifican condiciones que modifiquen sustancialmente el alcance estimado — incluyendo deuda técnica crítica, código sin documentar, dependencias obsoletas o sin soporte activo, arquitecturas inconsistentes, o configuraciones inaccesibles — el proceso se pausará antes de continuar.<br><br>
+            En ese escenario, se presentará un diagnóstico técnico detallado a Aura y se redefinirá el roadmap de forma conjunta antes de retomar la ejecución. Esta condición protege la integridad del proyecto y la inversión de Aura en el proceso.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 02</span>
+            <span class="clause-title">Bugs y deuda técnica heredada</span>
+          </div>
+          <div class="clause-body">
+            El alcance de la transición cubre la migración funcional de la plataforma en su estado actual. No incluye la corrección de errores funcionales preexistentes en el código, ni la resolución de deuda técnica acumulada fuera del alcance definido del proceso de migración.<br><br>
+            Los bugs o inconsistencias originados en el código anterior que sean detectados post-migración serán documentados, priorizados y gestionados dentro del ciclo operativo mensual (mantenimiento) o tratados como desarrollos específicos, según su naturaleza y criticidad.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 03</span>
+            <span class="clause-title">Servicios de terceros e integraciones externas</span>
+          </div>
+          <div class="clause-body">
+            La plataforma puede depender de servicios externos activos (proveedores de notificaciones push, autenticación, procesamiento de pagos, almacenamiento, analytics, etc.). La correcta migración de estas integraciones depende del acceso efectivo a sus credenciales y configuraciones activas.<br><br>
+            Integraciones bloqueadas por falta de acceso a credenciales, servicios externos discontinuados, o dependencias con planes o contratos vigentes a nombre del proveedor actual, quedan fuera del alcance comprometido y requerirán análisis y cotización por separado.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 04</span>
+            <span class="clause-title">Credenciales e información faltante</span>
+          </div>
+          <div class="clause-body">
+            Toda información técnica no disponible en el momento de la entrega — incluyendo credenciales de acceso, variables de entorno, certificados de firma, documentación de integraciones o configuraciones de servicios — generará un bloqueo técnico que será comunicado por escrito a Aura.<br><br>
+            La resolución de estos bloqueos está fuera del alcance del equipo técnico entrante y depende de la gestión de Aura con el proveedor actual o con los proveedores de los servicios involucrados.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 05</span>
+            <span class="clause-title">Plazos y variables operativas</span>
+          </div>
+          <div class="clause-body">
+            Los plazos estimados asumen la disponibilidad oportuna de todos los activos técnicos requeridos, acceso a la plataforma en producción para auditoría previa, y ausencia de bloqueos críticos no identificados durante la revisión inicial.<br><br>
+            Cualquier demora en la entrega de accesos, la identificación de complejidad técnica no prevista, o la aparición de deuda técnica severa durante la auditoría, impactará en los plazos de ejecución. Los ajustes serán comunicados con diagnóstico técnico detallado antes de continuar.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">T · 06</span>
+            <span class="clause-title">Infraestructura y capacidad cloud</span>
+          </div>
+          <div class="clause-body">
+            La configuración de infraestructura cloud propuesta es una estimación inicial basada en el perfil conocido de la plataforma. Los recursos reales requeridos se confirmarán durante la auditoría técnica y pueden variar según el volumen de datos, número de usuarios activos, integraciones habilitadas y patrones de tráfico.<br><br>
+            La infraestructura propuesta está diseñada para escalar de forma no disruptiva: los ajustes de capacidad se realizan sin tiempo de inactividad y sin impacto en la operación de la plataforma.
+          </div>
+        </div>
+
+      </div>
+
+      <div class="alert alert-teal">
+        <span>✓</span>
+        <span>Estas condiciones están documentadas para establecer expectativas claras y realistas desde el inicio. Un proyecto técnico bien enmarcado es un proyecto que se puede entregar correctamente.</span>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         7 · EQUIPO Y ROLES
+    ══════════════════════════════════════ -->
+    <div id="sec-equipo" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Equipo técnico dedicado</div>
+        <div class="page-title">Equipo y roles</div>
+        <div class="page-sub">Equipo enfocado, con roles y responsabilidades definidos. Comunicación directa, sin capas intermedias.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Composición del equipo</div>
+
+        <div class="team-card">
+          <div class="avatar" style="background:var(--blue-dim); color:var(--blue);">JU</div>
+          <div>
+            <div class="team-name">Juan · Responsable técnico principal</div>
+            <div class="team-role">Backend Developer · DevOps · Arquitectura</div>
+            <div class="team-desc">Responsable técnico de la transición completa: auditoría inicial, configuración de infraestructura cloud, migración de datos y servicios, mantenimiento operativo mensual y desarrollo de nuevas funcionalidades. Punto de contacto técnico directo para Aura en todas las etapas del proyecto.</div>
+            <div style="margin-top:0.5rem;">
+              <span class="badge badge-blue">Backend</span>
+              <span class="badge badge-blue">Mobile (preliminar)</span>
+              <span class="badge badge-blue">DevOps</span>
+              <span class="badge badge-blue">Cloud</span>
+              <span class="badge badge-blue">Arquitectura</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="avatar" style="background:var(--teal-dim); color:var(--teal);">QA</div>
+          <div>
+            <div class="team-name">QA Tester · Control de calidad independiente</div>
+            <div class="team-role">Tester funcional independiente</div>
+            <div class="team-desc">Realiza la validación técnica previa a la migración para documentar el estado actual de la plataforma, ejecuta el ciclo de testing completo durante el proceso, y emite la aprobación formal requerida para el corte definitivo. Su validación es condición necesaria para avanzar a cada etapa crítica.</div>
+            <div style="margin-top:0.5rem;">
+              <span class="badge badge-teal">Testing funcional</span>
+              <span class="badge badge-teal">Regresión</span>
+              <span class="badge badge-teal">Performance</span>
+              <span class="badge badge-teal">Mobile</span>
+              <span class="badge badge-teal">Validación QA</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="avatar" style="background:var(--amber-dim); color:var(--amber);">PM</div>
+          <div>
+            <div class="team-name">PM / Coordinación operativa</div>
+            <div class="team-role">Gestión de prioridades y seguimiento de roadmap</div>
+            <div class="team-desc">Gestiona el sistema de tickets, coordina prioridades entre el negocio y el desarrollo, y da seguimiento al roadmap técnico. Canal principal de comunicación con el responsable técnico en el día a día operativo.</div>
+            <div style="margin-top:0.5rem;">
+              <span class="badge badge-amber">Gestión</span>
+              <span class="badge badge-amber">Prioridades</span>
+              <span class="badge badge-amber">Roadmap</span>
+              <span class="badge badge-amber">Seguimiento</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="team-card">
+          <div class="avatar" style="background:var(--coral-dim); color:var(--coral);">EA</div>
+          <div>
+            <div class="team-name">Estefania Aristu · Propietaria y decisora</div>
+            <div class="team-role">Propietaria de Aura App · Decisiones estratégicas y de producto</div>
+            <div class="team-desc">Autoriza cada fase del proceso, toma las decisiones estratégicas de producto, y define las prioridades del roadmap de nuevas funcionalidades. Propietaria legal de todos los activos digitales de la plataforma.</div>
+            <div style="margin-top:0.5rem;">
+              <span class="badge badge-coral">Decisiones estratégicas</span>
+              <span class="badge badge-coral">Propietaria del activo</span>
+              <span class="badge badge-coral">Visión de producto</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Estructura de toma de decisiones</div>
+        <div class="card">
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Toda acción en producción requiere validación QA previa y aprobación explícita de Aura</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>El desarrollo de nuevas funcionalidades requiere estimación aprobada por escrito antes de ejecutarse</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>El responsable técnico comunica bloqueos operativos de forma inmediata y por escrito</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Toda redefinición de alcance se documenta y aprueba antes de continuar la ejecución</div></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+         8 · METODOLOGÍA
+    ══════════════════════════════════════ -->
+    <div id="sec-metodologia" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Procesos operativos</div>
+        <div class="page-title">Metodología de trabajo</div>
+        <div class="page-sub">Procesos definidos, comunicación directa y entregas predecibles. Visibilidad completa del estado técnico en todo momento.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Gestión de tareas y seguimiento</div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon" style="background:var(--teal-dim); font-size:18px;">🎫</div>
+            <div><div class="card-title">Sistema de tickets</div><div class="card-sub">Toda tarea, bug o mejora se gestiona a través de un ticket con trazabilidad completa.</div></div>
+          </div>
+          <ul class="checklist">
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Herramienta de gestión accesible para todo el equipo (Linear, GitHub Issues o equivalente)</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Cada bug se documenta con descripción, pasos de reproducción y evidencia adjunta</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Visibilidad del estado de cada tarea en tiempo real: pendiente / en progreso / en revisión / resuelto</div></li>
+            <li><div class="check-dot" style="background:var(--teal-dim); color:var(--teal);">✓</div><div>Priorización semanal en conjunto: crítico · alta · normal · backlog</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Ciclo operativo semanal</div>
+        <div class="grid2">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--blue); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Inicio de semana</div>
+            <div class="card-title" style="margin-bottom:0.5rem;">Definición de prioridades</div>
+            <div class="card-sub">Revisión breve (asincrónica o por canal de comunicación definido) para confirmar qué entra en el ciclo de la semana y qué se posterga. Sin reuniones innecesarias.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Cierre de semana</div>
+            <div class="card-title" style="margin-bottom:0.5rem;">Reporte de avance</div>
+            <div class="card-sub">Resumen del trabajo entregado, estado de lo pendiente, bloqueos activos y decisiones que requieren respuesta del negocio para continuar.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Flujo de un nuevo desarrollo</div>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--blue); background:var(--bg);"></div>
+            <div class="tl-week">Paso 1</div>
+            <div class="tl-title">Requerimiento</div>
+            <div class="tl-desc">El área de producto o la coordinación operativa documenta y describe la funcionalidad, mejora o ajuste requerido.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--teal); background:var(--bg);"></div>
+            <div class="tl-week">Paso 2</div>
+            <div class="tl-title">Estimación y aprobación</div>
+            <div class="tl-desc">El responsable técnico evalúa el requerimiento y presenta una estimación de alcance y tiempo. El desarrollo comienza únicamente con aprobación explícita de Aura.</div>
+            <div><span class="tl-tag" style="background:var(--teal-dim); color:var(--teal);">Aprobación previa · siempre</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--teal); background:var(--bg);"></div>
+            <div class="tl-week">Paso 3</div>
+            <div class="tl-title">Desarrollo</div>
+            <div class="tl-desc">El responsable técnico ejecuta el desarrollo. El avance es visible en el sistema de tickets. Si surgen dudas funcionales durante la ejecución, se consulta antes de asumir criterios propios.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--amber); background:var(--bg);"></div>
+            <div class="tl-week">Paso 4</div>
+            <div class="tl-title">Validación QA</div>
+            <div class="tl-desc">El QA Tester valida la funcionalidad en un entorno de staging antes del deploy a producción. Reporta cualquier inconsistencia o issue detectado.</div>
+            <div><span class="tl-tag" style="background:var(--amber-dim); color:var(--amber);">Requisito para deploy</span></div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-dot" style="border-color:var(--purple); background:var(--bg);"></div>
+            <div class="tl-week">Paso 5</div>
+            <div class="tl-title">Deploy a producción</div>
+            <div class="tl-desc">Con validación QA aprobada, el responsable técnico publica en producción. El equipo es notificado y el ticket se cierra con evidencia de entrega.</div>
+            <div><span class="tl-tag" style="background:var(--purple-dim); color:var(--purple);">Entregado ✓</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Comunicación operativa</div>
+        <div class="grid2">
+          <div class="card">
+            <div class="card-header"><div class="card-icon" style="background:var(--teal-dim);">💬</div><div class="card-title">Canal principal</div></div>
+            <div class="card-sub">Comunicación ágil del día a día a través del canal acordado (Slack, WhatsApp u otro). Para consultas, novedades y actualizaciones operativas.</div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-icon" style="background:var(--blue-dim);">📋</div><div class="card-title">Trazabilidad por tickets</div></div>
+            <div class="card-sub">Toda solicitud formal de desarrollo, bug o cambio queda documentada en el sistema de tickets para garantizar visibilidad, trazabilidad y seguimiento.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>

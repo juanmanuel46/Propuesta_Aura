@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura App · Propuesta Técnica y Comercial</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11; --bg2: #161719; --bg3: #1e2023;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0f0ee; --text2: #9a9a96; --text3: #5c5c58;
+    --teal: #1fcf8a; --teal-dim: rgba(31,207,138,0.12);
+    --blue: #4da8f5; --blue-dim: rgba(77,168,245,0.12);
+    --amber: #f5a623; --amber-dim: rgba(245,166,35,0.12);
+    --coral: #f5705a; --coral-dim: rgba(245,112,90,0.12);
+    --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 248px; background: var(--bg2); border-right: 1px solid var(--border); padding: 2rem 1.25rem; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; gap: 0.25rem; overflow-y: auto; }
+  .main { margin-left: 248px; flex: 1; padding: 2.5rem 3rem; max-width: 880px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .logo-dot { width: 28px; height: 28px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .logo-dot svg { width: 14px; height: 14px; }
+  .logo-text { font-size: 14px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; color: var(--text3); text-transform: uppercase; padding: 0 0.5rem; margin-top: 1.25rem; margin-bottom: 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--amber-dim); color: var(--amber); }
+  .sidebar-footer { margin-top: auto; padding: 1rem 0.5rem 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .page-header { margin-bottom: 2.5rem; }
+  .page-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--amber); background: var(--amber-dim); padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; letter-spacing: 0.04em; }
+  .page-tag-dot { width: 6px; height: 6px; background: var(--amber); border-radius: 50%; }
+  .page-title { font-size: 32px; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .page-sub { font-size: 15px; color: var(--text2); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+  .section-gap { margin-bottom: 2.5rem; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+  .metric-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .price-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
+  .price-card.featured { border-color: var(--amber); }
+  .price-card.featured::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--amber); }
+  .featured-badge { display: inline-block; font-size: 10px; font-weight: 600; color: var(--amber); background: var(--amber-dim); padding: 3px 10px; border-radius: 100px; margin-bottom: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .price-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 0.25rem; }
+  .price-amount { font-size: 32px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  .price-period { font-size: 13px; color: var(--text3); }
+  .price-desc { font-size: 13px; color: var(--text2); margin-top: 0.75rem; line-height: 1.7; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .alert { border-radius: 10px; padding: 0.875rem 1rem; font-size: 13px; margin-bottom: 1rem; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+  .alert-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .alert-teal  { background: var(--teal-dim);  color: var(--teal);  border: 1px solid rgba(31,207,138,0.2); }
+  .alert-coral { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(245,112,90,0.2); }
+  .alert-blue  { background: var(--blue-dim);  color: var(--blue);  border: 1px solid rgba(77,168,245,0.2); }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.625rem 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--text2); }
+  .info-value { color: var(--text); font-weight: 500; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .info-value.green { color: var(--teal); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 100px; margin-right: 4px; margin-top: 4px; }
+  .badge-teal   { background: var(--teal-dim);   color: var(--teal); }
+  .badge-amber  { background: var(--amber-dim);  color: var(--amber); }
+  .badge-coral  { background: var(--coral-dim);  color: var(--coral); }
+  .badge-blue   { background: var(--blue-dim);   color: var(--blue); }
+  .badge-purple { background: var(--purple-dim); color: var(--purple); }
+  .total-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 14px; padding: 1.5rem; margin-top: 1rem; }
+  .total-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .total-row:last-child { border-bottom: none; border-top: 1px solid var(--border2); margin-top: 0.5rem; padding-top: 1rem; }
+  .total-label { color: var(--text2); }
+  .total-value { color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+  .total-value.green { color: var(--teal); }
+  .phase-tabs { display: flex; gap: 4px; margin-bottom: 1.75rem; background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 4px; }
+  .phase-tab { flex: 1; padding: 0.6rem 0.75rem; border-radius: 9px; border: none; background: none; color: var(--text2); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-align: center; font-family: 'DM Sans', sans-serif; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+  .phase-tab:hover { background: var(--bg3); color: var(--text); }
+  .phase-tab.active.tab-amber { color: var(--amber); background: var(--amber-dim); border: 1px solid rgba(245,166,35,0.3); }
+  .phase-tab.active.tab-teal  { color: var(--teal);  background: var(--teal-dim);  border: 1px solid rgba(31,207,138,0.3); }
+  .phase-tab.active.tab-blue  { color: var(--blue);  background: var(--blue-dim);  border: 1px solid rgba(77,168,245,0.3); }
+  .phase-tab-num { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; opacity: 0.7; }
+  .phase-panel { display: none; }
+  .phase-panel.active { display: block; }
+  .own-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 0.75rem; }
+  .own-item { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 0.875rem; }
+  .own-icon { font-size: 18px; flex-shrink: 0; margin-top: 2px; }
+  .own-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .own-desc  { font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .clause { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .clause-header { display: flex; align-items: center; gap: 10px; margin-bottom: 0.625rem; }
+  .clause-num { font-size: 10px; font-weight: 600; font-family: 'DM Mono', monospace; color: var(--text3); background: var(--bg3); padding: 2px 8px; border-radius: 4px; letter-spacing: 0.06em; }
+  .clause-title { font-size: 14px; font-weight: 500; color: var(--text); }
+  .clause-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-dot">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#0e0f11" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="#0e0f11"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Aura App</div>
+        <div class="logo-sub">Propuesta técnica y comercial</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Secciones</div>
+    <button class="nav-item active" onclick="showSection('hosting', this)"><span>☁</span> Infraestructura</button>
+    <button class="nav-item" onclick="showSection('fases', this)"><span>$</span> Fases de cobro</button>
+    <button class="nav-item" onclick="showSection('ownership', this)"><span>◈</span> Control y propiedad</button>
+    <button class="nav-item" onclick="showSection('clausulas', this)"><span>≡</span> Consideraciones técnicas</button>
+    <button class="nav-item" onclick="showSection('resumen', this)"><span>◎</span> Resumen de inversión</button>
+
+    <div class="sidebar-footer">
+      Preparado por Juan<br>
+      Para Estefania Aristu · Mayo 2026<br><br>
+      Valores en USD. Conversión a pesos al tipo de cambio del día de cada pago.
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- INFRAESTRUCTURA -->
+    <div id="sec-hosting" class="section active">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Infraestructura cloud · A cargo de Estefania</div>
+        <div class="page-title">Hosting e infraestructura</div>
+        <div class="page-sub">La infraestructura cloud es un costo directo de Aura — fuera del alcance de los honorarios del equipo técnico.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Infraestructura inicial sugerida</div>
+        <div class="card">
+          <div class="info-row"><span class="info-label">Proveedor cloud propuesto</span><span class="info-value" style="color:var(--teal);">DigitalOcean</span></div>
+          <div class="info-row"><span class="info-label">Configuración inicial sugerida</span><span class="info-value">Ubuntu · 4 vCPU · 8 GB RAM · SSD</span></div>
+          <div class="info-row"><span class="info-label">Costo mensual estimado (configuración inicial)</span><span class="info-value">$40 – $80 USD / mes</span></div>
+          <div class="info-row"><span class="info-label">Disponibilidad de regiones</span><span class="info-value" style="color:var(--teal);">Multi-región · NY · Amsterdam · Singapur</span></div>
+          <div class="info-row"><span class="info-label">Escalabilidad</span><span class="info-value" style="color:var(--teal);">Vertical y horizontal · ajustable según uso</span></div>
+          <div class="info-row"><span class="info-label">Gestión del servidor</span><span class="info-value" style="color:var(--teal);">A cargo del equipo técnico (incluido en honorarios)</span></div>
+          <div class="info-row"><span class="info-label">Dominio (costo anual estimado)</span><span class="info-value">~$15 USD / año</span></div>
+          <div class="info-row"><span class="info-label">Certificado SSL</span><span class="info-value green">Gratuito · Let's Encrypt</span></div>
+        </div>
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          <span>La configuración inicial es una <strong>estimación de partida escalable</strong>. Los recursos cloud se ajustan según tráfico real, cantidad de usuarios, almacenamiento requerido e integraciones activas. El equipo técnico monitoreará y recomendará ajustes de capacidad a medida que la plataforma crezca.</span>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Costos directos de Aura — fuera del alcance de honorarios</div>
+        <div class="card">
+          <div style="font-size:13px; color:var(--text2); line-height:1.9; margin-bottom:0.75rem;">
+            Los siguientes ítems son responsabilidad directa de Aura como propietaria de la infraestructura y quedan fuera del alcance de los honorarios del equipo técnico:
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+            <span class="badge badge-coral">Servidor cloud ($40–$80 / mes · estimado)</span>
+            <span class="badge badge-coral">Dominio (~$15 / año)</span>
+            <span class="badge badge-coral">Honorarios del QA Tester</span>
+            <span class="badge badge-coral">Licencias de herramientas de terceros</span>
+            <span class="badge badge-coral">Servicios externos (Firebase, notificaciones push, etc.)</span>
+            <span class="badge badge-coral">Almacenamiento adicional si aplica</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FASES DE COBRO -->
+    <div id="sec-fases" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Esquema de honorarios · Juan</div>
+        <div class="page-title">Fases de cobro</div>
+        <div class="page-sub">Cada fase tiene su propio alcance, modalidad y condiciones. El presupuesto se aprueba antes de ejecutar.</div>
+      </div>
+
+      <div class="phase-tabs">
+        <button class="phase-tab active tab-amber" onclick="showPhase('migracion', this)">
+          <span class="phase-tab-num">FASE 1</span>
+          Migración
+        </button>
+        <button class="phase-tab tab-teal" onclick="showPhase('mantenimiento', this)">
+          <span class="phase-tab-num">FASE 2</span>
+          Mantenimiento
+        </button>
+        <button class="phase-tab tab-blue" onclick="showPhase('desarrollos', this)">
+          <span class="phase-tab-num">FASE 3</span>
+          Nuevos desarrollos
+        </button>
+      </div>
+
+      <!-- PANEL MIGRACIÓN -->
+      <div id="phase-migracion" class="phase-panel active">
+        <div class="section-gap">
+          <div class="section-title">Migración y recuperación de plataforma</div>
+          <div class="price-card featured">
+            <div class="featured-badge">Fase 1 · Pago único · Punto de partida</div>
+            <div class="price-title">Migración técnica completa de Aura App</div>
+            <div><span class="price-amount">$2.500 – $3.500</span><span style="font-size:16px; color:var(--text3);"> USD</span></div>
+            <div class="price-period">pago único · duración estimada 4 a 6 semanas · sujeto a auditoría inicial</div>
+            <div class="price-desc">
+              <strong style="color:var(--text);">Alcance incluido:</strong> auditoría técnica del código e infraestructura recibida · configuración del entorno cloud · migración completa de base de datos · despliegue del backend y frontend sobre el stack confirmado en auditoría · verificación de integraciones activas · validación QA con corte definitivo y entrega documentada.<br><br>
+              <strong style="color:var(--text);">Stack tecnológico:</strong> identificado preliminarmente. El stack definitivo y el alcance exacto de la migración se confirman tras la auditoría inicial del código entregado. El rango presupuestario contempla la variabilidad habitual de una transición de este tipo.<br><br>
+              <strong style="color:var(--text);">No incluye:</strong> honorarios del QA Tester (factura directamente a Aura), costo del servidor cloud, licencias de herramientas de terceros, ni servicios externos.
+            </div>
+          </div>
+          <div class="alert alert-amber">
+            <span>⚠</span>
+            <span>El inicio efectivo está condicionado a la <strong>recepción completa de accesos, repositorios y credenciales</strong>. Ver sección "Consideraciones técnicas" para el detalle.</span>
+          </div>
+          <div class="card" style="border-color: rgba(245,166,35,0.2);">
+            <div style="font-size:11px; font-weight:600; color:var(--amber); margin-bottom:0.75rem; text-transform:uppercase; letter-spacing:0.08em;">Modalidad de pago sugerida</div>
+            <div class="info-row"><span class="info-label">50% al inicio</span><span class="info-value">Previo a la auditoría técnica</span></div>
+            <div class="info-row"><span class="info-label">50% al cierre</span><span class="info-value">Con entrega en producción validada por QA</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL MANTENIMIENTO -->
+      <div id="phase-mantenimiento" class="phase-panel">
+        <div class="section-gap">
+          <div class="section-title">Mantenimiento mensual · Abono continuo</div>
+          <div class="price-card" style="border-color:var(--teal);">
+            <div style="position:absolute; top:0; left:0; right:0; height:2px; background:var(--teal);"></div>
+            <div style="display:inline-block; font-size:10px; font-weight:600; color:var(--teal); background:var(--teal-dim); padding:3px 10px; border-radius:100px; margin-bottom:0.75rem; letter-spacing:0.06em; text-transform:uppercase;">Fase 2 · Mensual · Recurrente</div>
+            <div class="price-title">Mantenimiento técnico y soporte operativo</div>
+            <div><span class="price-amount">$450 – $550</span><span style="font-size:18px; color:var(--text3);"> / mes</span></div>
+            <div class="price-period">hasta 10 horas mensuales · comienza post-migración · sin permanencia mínima</div>
+            <div class="price-desc">
+              <strong style="color:var(--text);">Incluye hasta 10 horas mensuales</strong> de trabajo técnico dedicado: monitoreo del servidor, corrección de bugs detectados en producción, actualizaciones de seguridad, revisión de performance y soporte técnico operativo.<br><br>
+              Las horas <strong>no son acumulables</strong> entre períodos. Horas excedentes se cotizan a tarifa horaria ($35–$50 USD/hora) y requieren aprobación previa de Aura.<br><br>
+              <strong style="color:var(--text);">No incluye:</strong> infraestructura cloud (a cargo de Aura), honorarios del QA Tester, licencias de servicios de terceros, ni nuevas funcionalidades.
+            </div>
+          </div>
+          <div class="grid2" style="margin-top:0.5rem;">
+            <div class="card">
+              <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">✓ Cubierto por el abono</div>
+              <div style="font-size:13px; color:var(--text2); line-height:2;">
+                Monitoreo continuo del servidor<br>
+                Corrección de bugs en producción<br>
+                Actualizaciones de seguridad<br>
+                Revisión y optimización de performance<br>
+                Soporte técnico operativo (hasta 10 hs/mes)
+              </div>
+            </div>
+            <div class="card">
+              <div style="font-size:11px; font-weight:600; color:var(--coral); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">✗ Fuera del abono</div>
+              <div style="font-size:13px; color:var(--text2); line-height:2;">
+                Servidor cloud (Aura paga directo)<br>
+                Honorarios del QA Tester<br>
+                Licencias de herramientas externas<br>
+                Servicios de terceros (Firebase, etc.)<br>
+                Nuevas funcionalidades (Fase 3)
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PANEL NUEVOS DESARROLLOS -->
+      <div id="phase-desarrollos" class="phase-panel">
+        <div class="section-gap">
+          <div class="section-title">Desarrollo de nuevas funcionalidades · Por requerimiento</div>
+          <div class="price-card" style="border-color:var(--blue);">
+            <div style="position:absolute; top:0; left:0; right:0; height:2px; background:var(--blue);"></div>
+            <div style="display:inline-block; font-size:10px; font-weight:600; color:var(--blue); background:var(--blue-dim); padding:3px 10px; border-radius:100px; margin-bottom:0.75rem; letter-spacing:0.06em; text-transform:uppercase;">Fase 3 · Por requerimiento · Aprobación previa obligatoria</div>
+            <div class="price-title">Desarrollo de nuevas funcionalidades</div>
+            <div><span class="price-amount">$35 – $50</span><span style="font-size:18px; color:var(--text3);"> / hora</span></div>
+            <div class="price-period">según requerimiento · estimación de horas entregada antes de ejecutar</div>
+            <div class="price-desc">
+              Cada nueva funcionalidad se gestiona como un módulo independiente: se presenta una estimación detallada de horas y alcance, Aura la aprueba por escrito, y el desarrollo comienza únicamente con esa aprobación. No se ejecuta ningún desarrollo sin presupuesto validado.<br><br>
+              <strong style="color:var(--text);">No incluye:</strong> honorarios del QA Tester, quien valida cada entrega de forma independiente y factura directamente a Aura.
+            </div>
+          </div>
+          <div class="alert alert-blue">
+            <span>ℹ</span>
+            <span>Cualquier funcionalidad nueva que surja durante la migración se trata como scope adicional y se presupuesta por separado, previo a su ejecución.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OWNERSHIP -->
+    <div id="sec-ownership" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Independencia tecnológica · Activo estratégico</div>
+        <div class="page-title">Control y propiedad de la plataforma</div>
+        <div class="page-sub">Al finalizar la migración, Aura tiene el control operativo y legal completo de cada componente de su producto.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Activos bajo propiedad directa de Aura</div>
+        <div class="own-grid">
+          <div class="own-item">
+            <div class="own-icon">⬡</div>
+            <div>
+              <div class="own-title">Repositorios Git</div>
+              <div class="own-desc">Todo el código fuente alojado bajo la cuenta de Aura. Control total de versiones, historial y accesos.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">☁</div>
+            <div>
+              <div class="own-title">Infraestructura cloud</div>
+              <div class="own-desc">Servidor, bases de datos y entornos cloud registrados directamente a nombre de Aura. Sin intermediarios.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">◉</div>
+            <div>
+              <div class="own-title">Stores mobile</div>
+              <div class="own-desc">Cuentas de App Store y Google Play bajo titularidad de Aura. El equipo técnico actúa como colaborador autorizado.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">◈</div>
+            <div>
+              <div class="own-title">Dominio y DNS</div>
+              <div class="own-desc">Dominio registrado a nombre de Aura con control directo de la configuración DNS, sin dependencia de terceros.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">⊞</div>
+            <div>
+              <div class="own-title">Backups centralizados</div>
+              <div class="own-desc">Política de respaldos periódicos almacenados en infraestructura de Aura. Recuperación ante desastres bajo control propio.</div>
+            </div>
+          </div>
+          <div class="own-item">
+            <div class="own-icon">⊕</div>
+            <div>
+              <div class="own-title">Independencia de proveedores</div>
+              <div class="own-desc">Arquitectura diseñada para no generar lock-in. El equipo técnico puede cambiar sin afectar la continuidad del producto.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Modelo de accesos y colaboración</div>
+        <div class="card">
+          <div style="font-size:13px; color:var(--text2); line-height:1.8;">
+            El equipo técnico opera con accesos de colaborador en todos los sistemas, nunca como propietario. Esto garantiza que ante cualquier cambio de equipo o proveedor, <strong style="color:var(--text);">Aura retiene el control total</strong> sin depender de transferencias ni negociaciones adicionales.
+          </div>
+          <div style="margin-top:1rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+            <span class="badge badge-teal">Git · Acceso colaborador</span>
+            <span class="badge badge-teal">Cloud · IAM controlado</span>
+            <span class="badge badge-teal">Stores · Rol de desarrollo</span>
+            <span class="badge badge-teal">DNS · Acceso delegado</span>
+            <span class="badge badge-teal">Backups · Repositorio propio de Aura</span>
+          </div>
+        </div>
+        <div class="alert alert-teal">
+          <span>✓</span>
+          <span>Esta estructura garantiza <strong>continuidad operativa total</strong> ante cualquier escenario: cambio de equipo, expansión, auditoría externa o proceso de due diligence.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONSIDERACIONES TÉCNICAS -->
+    <div id="sec-clausulas" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Marco contractual · Transparencia operativa</div>
+        <div class="page-title">Consideraciones técnicas</div>
+        <div class="page-sub">Condiciones que enmarcan el correcto desarrollo del proyecto. Establecidas para proteger a todas las partes.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Condiciones de inicio y ejecución</div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 01</span>
+            <span class="clause-title">Dependencia de accesos y entrega de activos</span>
+          </div>
+          <div class="clause-body">
+            El inicio efectivo de la migración está condicionado a la recepción completa de todos los activos técnicos necesarios: código fuente en repositorios, accesos a infraestructura y servidores, credenciales de stores mobile (App Store / Google Play), configuraciones de servicios de terceros, documentación técnica disponible, y acceso a DNS y dominio.<br><br>
+            En caso de que la entrega de accesos sea parcial, demorada o incompleta, los plazos estimados se ajustarán proporcionalmente. El equipo técnico notificará por escrito cualquier bloqueo operativo originado por esta causa.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 02</span>
+            <span class="clause-title">Auditoría técnica y renegociación de alcance</span>
+          </div>
+          <div class="clause-body">
+            Antes de iniciar cualquier trabajo de migración, el equipo técnico realizará una auditoría del código e infraestructura recibidos. Si durante esta revisión se identifican condiciones que modifiquen sustancialmente el alcance estimado — incluyendo deuda técnica crítica, código sin documentar, dependencias obsoletas o sin soporte, arquitecturas inconsistentes o configuraciones inaccesibles — el proyecto se pausará antes de continuar.<br><br>
+            En ese caso se presentará un diagnóstico técnico detallado y se redefinirá el alcance y presupuesto de forma conjunta con Aura, antes de retomar la ejecución. Esta condición protege a ambas partes de comprometerse con estimaciones que no reflejen la realidad técnica del producto.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 03</span>
+            <span class="clause-title">Stack tecnológico · Confirmación post-auditoría</span>
+          </div>
+          <div class="clause-body">
+            El stack tecnológico identificado preliminarmente se trata como hipótesis de trabajo hasta ser confirmado durante la auditoría inicial. No se garantizan tiempos, costos ni alcance definitivos sobre tecnologías no verificadas directamente. El rango presupuestario de Fase 1 contempla la variabilidad esperada de este proceso.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 04</span>
+            <span class="clause-title">Bugs y deuda técnica heredada</span>
+          </div>
+          <div class="clause-body">
+            La migración no incluye corrección de bugs funcionales preexistentes en la plataforma, ni resolución de deuda técnica acumulada fuera del alcance del proceso de migración. Los errores originados en el código anterior que sean detectados post-migración se cotizarán como trabajo adicional dentro de Fase 2 (mantenimiento) o Fase 3 (desarrollo), según corresponda.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 05</span>
+            <span class="clause-title">Servicios de terceros y credenciales externas</span>
+          </div>
+          <div class="clause-body">
+            La correcta integración de servicios de terceros (notificaciones push, autenticación, pagos, almacenamiento externo, analytics, etc.) depende del acceso efectivo a las credenciales y configuraciones activas de esos servicios. Integraciones bloqueadas por falta de acceso, o servicios discontinuados, quedan fuera del alcance comprometido y requerirán cotización separada.
+          </div>
+        </div>
+
+        <div class="clause">
+          <div class="clause-header">
+            <span class="clause-num">C · 06</span>
+            <span class="clause-title">Régimen de horas de mantenimiento</span>
+          </div>
+          <div class="clause-body">
+            Las 10 horas mensuales incluidas en el abono de mantenimiento (Fase 2) <strong>no son acumulables</strong> entre períodos. Las horas no utilizadas en un mes no se transfieren al siguiente. Horas adicionales que superen el límite mensual se cotizan y aprueban previamente a la tarifa horaria de desarrollo ($35–$50 USD/hora). Todo desarrollo de nuevas funcionalidades requiere presupuesto aprobado por escrito antes de su ejecución.
+          </div>
+        </div>
+      </div>
+
+      <div class="alert alert-blue" style="margin-top: -1rem;">
+        <span>ℹ</span>
+        <span>Estas condiciones están diseñadas para establecer expectativas claras y realistas desde el inicio. Un proyecto técnico bien enmarcado es un proyecto que se entrega correctamente.</span>
+      </div>
+    </div>
+
+    <!-- RESUMEN DE INVERSIÓN -->
+    <div id="sec-resumen" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Resumen financiero consolidado</div>
+        <div class="page-title">Resumen de inversión</div>
+        <div class="page-sub">Visión consolidada de todas las fases y costos del proyecto. Sin sorpresas.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Métricas del modelo propuesto</div>
+        <div class="grid3">
+          <div class="metric">
+            <div class="metric-label">Migración · Fase 1</div>
+            <div class="metric-value" style="color:var(--amber);">$2.5K–3.5K</div>
+            <div class="metric-sub">USD · pago único</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Mantenimiento · Fase 2</div>
+            <div class="metric-value" style="color:var(--teal);">$450–550</div>
+            <div class="metric-sub">USD / mes · 10 hs incluidas</div>
+          </div>
+          <div class="metric">
+            <div class="metric-label">Desarrollo · Fase 3</div>
+            <div class="metric-value" style="color:var(--blue);">$35–50</div>
+            <div class="metric-sub">USD / hora · según demanda</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Desglose completo de costos</div>
+        <div class="total-box">
+          <div class="total-row">
+            <span class="total-label">Fase 1 · Migración técnica completa</span>
+            <span class="total-value">$2.500 – $3.500 USD · pago único</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Fase 2 · Mantenimiento mensual (desde mes 2)</span>
+            <span class="total-value">$450 – $550 USD / mes</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Infraestructura cloud (cargo directo Aura · estimado)</span>
+            <span class="total-value">$40 – $80 USD / mes</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label">Fase 3 · Nuevas funcionalidades (por requerimiento)</span>
+            <span class="total-value">$35 – $50 USD / hora</span>
+          </div>
+          <div class="total-row">
+            <span class="total-label" style="color:var(--text); font-weight:500;">Ownership · Control total de la plataforma</span>
+            <span class="total-value green" style="font-size:15px;">100% Aura · desde el día 1 ✓</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Principios del modelo</div>
+        <div class="grid2">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Transparencia</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.7;">Cada costo es visible, separado y justificado. No existen costos opacos ni servicios agrupados sin desglose.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--amber); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Ownership</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.7;">Infraestructura, código y cuentas registradas a nombre de Aura. Independencia total de cualquier proveedor externo.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--blue); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Escalabilidad</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.7;">Infraestructura cloud ajustable. El modelo de costos crece solo cuando el producto crece, sin contratos fijos de capacidad.</div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--purple); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">Continuidad</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.7;">Equipo técnico dedicado, documentación centralizada y accesos propios garantizan la continuidad operativa del producto.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg2); border:1px solid var(--border); border-radius:12px; padding:1.25rem 1.5rem;">
+        <div style="font-size:11px; font-weight:600; color:var(--text3); text-transform:uppercase; letter-spacing:0.08em; margin-bottom:0.625rem;">Nota sobre moneda y conversión</div>
+        <div style="font-size:13px; color:var(--text2); line-height:1.7;">
+          Todos los valores están expresados en dólares estadounidenses (USD). La conversión a pesos argentinos se realiza al tipo de cambio vigente en la fecha de cada pago. Ante variaciones del tipo de cambio, los honorarios en USD permanecen inalterados.
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showSection(name, btn) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+function showPhase(name, btn) {
+  document.querySelectorAll('.phase-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.phase-tab').forEach(el => el.classList.remove('active'));
+  document.getElementById('phase-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
