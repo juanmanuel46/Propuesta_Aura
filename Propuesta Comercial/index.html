@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aura App · Propuesta Comercial y Presupuesto</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0f11; --bg2: #161719; --bg3: #1e2023;
+    --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+    --text: #f0f0ee; --text2: #9a9a96; --text3: #5c5c58;
+    --teal: #1fcf8a; --teal-dim: rgba(31,207,138,0.12); --teal-dim2: rgba(31,207,138,0.06);
+    --blue: #4da8f5; --blue-dim: rgba(77,168,245,0.12);
+    --amber: #f5a623; --amber-dim: rgba(245,166,35,0.12);
+    --coral: #f5705a; --coral-dim: rgba(245,112,90,0.12);
+    --purple: #a78bfa; --purple-dim: rgba(167,139,250,0.12);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 15px; line-height: 1.6; }
+  .layout { display: flex; min-height: 100vh; }
+  .sidebar { width: 240px; background: var(--bg2); border-right: 1px solid var(--border); padding: 2rem 1.25rem; position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; gap: 0.25rem; overflow-y: auto; }
+  .main { margin-left: 240px; flex: 1; padding: 2.5rem 3rem; max-width: 860px; }
+  .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 2rem; }
+  .logo-dot { width: 28px; height: 28px; background: var(--amber); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+  .logo-dot svg { width: 14px; height: 14px; }
+  .logo-text { font-size: 14px; font-weight: 600; color: var(--text); }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 1px; }
+  .nav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1em; color: var(--text3); text-traSi hay deuda técnica importantensform: uppercase; padding: 0 0.5rem; margin-top: 1.25rem; margin-bottom: 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.5rem 0.75rem; border-radius: 8px; cursor: pointer; font-size: 13px; color: var(--text2); transition: all 0.15s; border: none; background: none; width: 100%; text-align: left; }
+  .nav-item:hover { background: var(--bg3); color: var(--text); }
+  .nav-item.active { background: var(--amber-dim); color: var(--amber); }
+  .sidebar-footer { margin-top: auto; padding: 1rem 0.5rem 0; border-top: 1px solid var(--border); font-size: 12px; color: var(--text3); line-height: 1.5; }
+  .page-header { margin-bottom: 2.5rem; }
+  .page-tag { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 500; color: var(--amber); background: var(--amber-dim); padding: 4px 12px; border-radius: 100px; margin-bottom: 1rem; letter-spacing: 0.04em; }
+  .page-tag-dot { width: 6px; height: 6px; background: var(--amber); border-radius: 50%; }
+  .page-title { font-size: 32px; font-weight: 600; color: var(--text); line-height: 1.2; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+  .page-sub { font-size: 15px; color: var(--text2); }
+  .section { display: none; }
+  .section.active { display: block; }
+  .section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--border); }
+  .section-gap { margin-bottom: 2.5rem; }
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; margin-bottom: 0.75rem; }
+  .card-sub { font-size: 13px; color: var(--text2); line-height: 1.6; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 0.75rem; }
+  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+  .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
+  .metric-value { font-size: 26px; font-weight: 600; color: var(--text); line-height: 1; }
+  .metric-sub { font-size: 12px; color: var(--text3); margin-top: 4px; }
+  .price-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; margin-bottom: 0.75rem; position: relative; overflow: hidden; }
+  .price-card.featured { border-color: var(--amber); }
+  .price-card.featured::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--amber); }
+  .featured-badge { display: inline-block; font-size: 10px; font-weight: 600; color: var(--amber); background: var(--amber-dim); padding: 3px 10px; border-radius: 100px; margin-bottom: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; }
+  .price-title { font-size: 16px; font-weight: 500; color: var(--text); margin-bottom: 0.25rem; }
+  .price-amount { font-size: 32px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  .price-period { font-size: 13px; color: var(--text3); }
+  .price-desc { font-size: 13px; color: var(--text2); margin-top: 0.75rem; line-height: 1.6; border-top: 1px solid var(--border); padding-top: 0.75rem; }
+  .alert { border-radius: 10px; padding: 0.875rem 1rem; font-size: 13px; margin-bottom: 1rem; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+  .alert-amber { background: var(--amber-dim); color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+  .alert-teal { background: var(--teal-dim); color: var(--teal); border: 1px solid rgba(31,207,138,0.2); }
+  .alert-coral { background: var(--coral-dim); color: var(--coral); border: 1px solid rgba(245,112,90,0.2); }
+  .info-row { display: flex; justify-content: space-between; align-items: center; padding: 0.625rem 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: var(--text2); }
+  .info-value { color: var(--text); font-weight: 500; font-family: 'DM Mono', monospace; font-size: 13px; }
+  .info-value.green { color: var(--teal); }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 100px; margin-right: 4px; margin-top: 4px; }
+  .badge-teal { background: var(--teal-dim); color: var(--teal); }
+  .badge-amber { background: var(--amber-dim); color: var(--amber); }
+  .badge-coral { background: var(--coral-dim); color: var(--coral); }
+  .comp-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .comp-table th { text-align: left; padding: 0.75rem 1rem; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 1px solid var(--border2); }
+  .comp-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); color: var(--text); }
+  .comp-table tr:last-child td { border-bottom: none; }
+  .comp-table td:first-child { color: var(--text2); }
+  .comp-table .good { color: var(--teal); font-weight: 500; }
+  .comp-table .bad { color: var(--coral); }
+  .comp-table .neutral { color: var(--amber); }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+  /* Summary total box */
+  .total-box { background: var(--bg3); border: 1px solid var(--border2); border-radius: 14px; padding: 1.5rem; margin-top: 1rem; }
+  .total-row { display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .total-row:last-child { border-bottom: none; border-top: 1px solid var(--border2); margin-top: 0.5rem; padding-top: 1rem; }
+  .total-label { color: var(--text2); }
+  .total-value { color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 500; }
+  .total-value.highlight { color: var(--amber); font-size: 18px; }
+  .total-value.green { color: var(--teal); }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <nav class="sidebar">
+    <div class="logo">
+      <div class="logo-dot">
+        <svg viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#0e0f11" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="#0e0f11"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">Aura App</div>
+        <div class="logo-sub">Propuesta comercial</div>
+      </div>
+    </div>
+
+    <div class="nav-label">Secciones</div>
+    <button class="nav-item active" onclick="showSection('hosting')"><span>☁</span> Hosting e infraestructura</button>
+    <button class="nav-item" onclick="showSection('inversion')"><span>$</span> Fases de inversión</button>
+    <button class="nav-item" onclick="showSection('mantenimiento')"><span>⟳</span> Modelo de mantenimiento</button>
+    <button class="nav-item" onclick="showSection('comparativa')"><span>≡</span> Comparativa de ahorro</button>
+
+    <div class="sidebar-footer">
+      Preparado por Juan<br>
+      Para Estefania Aristu · Mayo 2026<br><br>
+      Valores en USD. Conversión a pesos al tipo de cambio del día del pago.
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- HOSTING -->
+    <div id="sec-hosting" class="section active">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Infraestructura · A cargo de Estefania</div>
+        <div class="page-title">Hosting e infraestructura</div>
+        <div class="page-sub">El servidor es un costo directo de Aura — no está incluido en los honorarios del dev.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Comparativa de costos de servidor</div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="comp-table">
+            <thead>
+              <tr><th>Concepto</th><th>GauchoCode (actual)</th><th>DigitalOcean (propuesto)</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Costo mensual</td><td class="bad">$350 USD/mes</td><td class="good">$40 – $80 USD/mes</td></tr>
+              <tr><td>Especificaciones</td><td class="neutral">VPS Linux 8 cores · 16 GB · 240 NVMe</td><td class="good">Ubuntu · 4 vCPU · 8 GB RAM</td></tr>
+              <tr><td>Ubicación</td><td class="bad">Servidores locales AR</td><td class="good">Multi-región · NY · Amsterdam · Singapur</td></tr>
+              <tr><td>Escalabilidad global</td><td class="bad">Limitada</td><td class="good">Lista para exterior desde el día 1</td></tr>
+              <tr><td>Horas de soporte TI incluidas</td><td class="bad">Sin especificar</td><td class="good">Gestionado por Juan (incluido en honorarios)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Detalle de costos de infraestructura</div>
+        <div class="card">
+          <div class="info-row"><span class="info-label">Servidor actual con GauchoCode</span><span class="info-value" style="color:var(--coral);">$350 / mes</span></div>
+          <div class="info-row"><span class="info-label">Servidor nuevo DigitalOcean (estimado)</span><span class="info-value">$40 – $80 / mes</span></div>
+          <div class="info-row"><span class="info-label">Ahorro mensual en hosting</span><span class="info-value green">~$270 – $310 / mes</span></div>
+          <div class="info-row"><span class="info-label">Ahorro anual en hosting</span><span class="info-value green">~$3.240 – $3.720 / año</span></div>
+          <div class="info-row"><span class="info-label">Dominio (costo anual estimado)</span><span class="info-value">~$15 / año</span></div>
+          <div class="info-row"><span class="info-label">Certificado SSL</span><span class="info-value green">Gratuito (Let's Encrypt)</span></div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Qué NO está incluido en los honorarios del dev</div>
+        <div class="card">
+          <div style="font-size:13px; color:var(--text2); line-height:1.9;">
+            Los siguientes son costos directos de la plataforma Aura, no del desarrollador:
+          </div>
+          <div style="margin-top:0.75rem; display:flex; flex-wrap:wrap; gap:0.5rem;">
+            <span class="badge badge-coral">Servidor DigitalOcean ($40–$80/mes)</span>
+            <span class="badge badge-coral">Dominio (~$15/año)</span>
+            <span class="badge badge-coral">Honorarios del QA Tester</span>
+            <span class="badge badge-coral">Licencias de herramientas de IA</span>
+            <span class="badge badge-coral">Servicios de terceros (Firebase, etc.)</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVERSIÓN -->
+    <div id="sec-inversion" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Honorarios freelance · Juan</div>
+        <div class="page-title">Fases de inversión</div>
+        <div class="page-sub">Valores en USD. El presupuesto se aprueba antes de ejecutar cada fase.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Fase 1 · Migración completa</div>
+
+        <div class="price-card featured">
+          <div class="featured-badge">Fase 1 · Pago único · Primero</div>
+          <div class="price-title">Migración completa de Aura App</div>
+          <div><span class="price-amount">$2.500 – $3.500</span></div>
+          <div class="price-period">pago único · duración estimada 4 a 6 semanas</div>
+          <div class="price-desc">
+            <strong>Incluye:</strong> análisis completo del código recibido de GauchoCode, configuración del servidor en DigitalOcean (Ubuntu · 4 vCPU · 8 GB RAM), migración de la base de datos, instalación del backend y frontend (React Native + WordPress), y corte definitivo con validación QA.<br><br>
+            <strong>El rango depende de la complejidad técnica encontrada. Si hay deuda técnica importante (código sin documentar, dependencias viejas, configuraciones inconsistentes), se renegocia antes de empezar.<br><br>
+            <strong>No incluye:</strong> honorarios del QA Tester (factura directamente a Estefania), costo del servidor DigitalOcean, licencias de herramientas de IA, ni servicios de terceros.
+          </div>
+        </div>
+
+        <div class="alert alert-amber">
+          <span>⚠</span>
+          El stack a confirmar es React Native (mobile) + WordPress (web). El rango definitivo se cerrará tras la primera revisión del código entregado por GauchoCode.
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Fase 3 · Desarrollo de nuevas features</div>
+
+        <div class="price-card">
+          <div class="price-title">Desarrollo de nuevas funcionalidades</div>
+          <div><span class="price-amount">$35 – $50</span><span style="font-size:18px; color:var(--text3);"> / hora</span></div>
+          <div class="price-period">según requerimiento · presupuesto previo obligatorio</div>
+          <div class="price-desc">
+            Cada nueva funcionalidad se presupuesta con estimación de horas antes de comenzar. Se entrega la estimación, se aprueba, y solo entonces se ejecuta.<br><br>
+            <strong>No incluye:</strong> honorarios del QA Tester, quien valida cada entrega de forma independiente y factura directamente a Estefania.
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Herramientas de IA</div>
+        <div class="price-card">
+          <div class="price-title">Licencias de herramientas de IA</div>
+          <div><span class="price-amount" style="font-size:22px;">A convenir</span></div>
+          <div class="price-period">costo mensual fijo · a cargo de Estefania</div>
+          <div class="price-desc">
+            El uso de herramientas de inteligencia artificial (asistentes de código, revisión automatizada, generación de tests, etc.) forma parte del flujo de trabajo y representa un costo real mensual estimado en <strong style="color:var(--text);">~$20 USD/mes</strong>.<br><br>
+            Este ítem se acuerda por separado antes de iniciar. Permite trabajar más rápido y con mayor calidad — en beneficio directo del producto.<br><br>
+            <strong>No está incluido en los honorarios de mantenimiento ni de desarrollo.</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MANTENIMIENTO -->
+    <div id="sec-mantenimiento" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Régimen mensual · Fase 2</div>
+        <div class="page-title">Modelo de mantenimiento</div>
+        <div class="page-sub">Un abono mensual predecible que incluye 10 horas reales de trabajo dedicado.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Mantenimiento mensual</div>
+
+        <div class="price-card" style="border-color:var(--teal);">
+          <div style="position:absolute; top:0; left:0; right:0; height:2px; background:var(--teal);"></div>
+          <div style="display:inline-block; font-size:10px; font-weight:600; color:var(--teal); background:var(--teal-dim); padding:3px 10px; border-radius:100px; margin-bottom:0.75rem; letter-spacing:0.06em; text-transform:uppercase;">Fase 2 · Mensual · Ongoing</div>
+          <div class="price-title">Mantenimiento y soporte mensual</div>
+          <div><span class="price-amount">$450 – $550</span><span style="font-size:18px; color:var(--text3);"> / mes</span></div>
+          <div class="price-period">máximo 10 horas mensuales incluidas · comienza post-migración</div>
+          <div class="price-desc">
+            <strong>Incluye hasta 10 horas mensuales</strong> dedicadas a monitoreo del servidor, corrección de bugs, actualizaciones de seguridad, revisión de performance y soporte técnico.<br><br>
+            Horas adicionales que superen las 10 hs/mes se acuerdan aparte a la tarifa horaria del desarrollo ($35–$50/hora).<br><br>
+            <strong>No incluye:</strong> infraestructura (servidor DigitalOcean a cargo de Estefania), honorarios del QA Tester, licencias de herramientas de IA, ni servicios de terceros como Firebase, notificaciones push, etc.
+          </div>
+        </div>
+
+        <!-- Hours vs GauchoCode highlight -->
+        <div style="background:var(--teal-dim); border:1px solid rgba(31,207,138,0.3); border-radius:12px; padding:1.25rem 1.5rem; display:flex; align-items:center; gap:1.5rem;">
+          <div style="flex-shrink:0;">
+            <div style="font-size:11px; color:var(--teal); font-weight:600; letter-spacing:0.08em; text-transform:uppercase; margin-bottom:8px;">Horas de soporte</div>
+            <div style="display:flex; align-items:center; gap:1rem;">
+              <div style="text-align:center;">
+                <div style="font-size:28px; font-weight:600; color:var(--coral); line-height:1;">5 hs</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:2px;">GauchoCode</div>
+              </div>
+              <div style="font-size:22px; color:var(--text3);">→</div>
+              <div style="text-align:center;">
+                <div style="font-size:28px; font-weight:600; color:var(--teal); line-height:1;">10 hs</div>
+                <div style="font-size:11px; color:var(--text3); margin-top:2px;">Equipo propio</div>
+              </div>
+            </div>
+          </div>
+          <div style="border-left:1px solid rgba(31,207,138,0.25); padding-left:1.5rem;">
+            <div style="font-size:14px; font-weight:500; color:var(--text); margin-bottom:4px;">El doble de horas de soporte real</div>
+            <div style="font-size:13px; color:var(--text2); line-height:1.6;">GauchoCode incluía solo 5 hs/mes de soporte. Con el equipo propio se proponen <strong style="color:var(--teal);">10 horas mensuales reales</strong> de mantenimiento.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">¿Qué cubre el mantenimiento?</div>
+        <div class="grid2">
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--teal); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">✓ Incluido</div>
+            <div style="font-size:13px; color:var(--text2); line-height:2;">
+              Monitoreo continuo del servidor<br>
+              Corrección de bugs detectados<br>
+              Actualizaciones de seguridad<br>
+              Revisión de performance<br>
+              Soporte técnico hasta 10 hs/mes
+            </div>
+          </div>
+          <div class="card">
+            <div style="font-size:11px; font-weight:600; color:var(--coral); margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.08em;">✗ No incluido</div>
+            <div style="font-size:13px; color:var(--text2); line-height:2;">
+              Servidor DigitalOcean (costo directo Aura)<br>
+              Honorarios del QA Tester<br>
+              Licencias de herramientas de IA<br>
+              Servicios de terceros (Firebase, etc.)<br>
+              Nuevas features (se cotizan aparte)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- COMPARATIVA -->
+    <div id="sec-comparativa" class="section">
+      <div class="page-header">
+        <div class="page-tag"><span class="page-tag-dot"></span> Contexto financiero</div>
+        <div class="page-title">Comparativa de ahorro</div>
+        <div class="page-sub">El ahorro en hosting financia el mantenimiento mensual. Estefania recupera desde el primer mes.</div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Ahorro mensual en infraestructura</div>
+        <div class="grid3">
+          <div class="metric"><div class="metric-label">Hosting antes</div><div class="metric-value" style="color:var(--coral);">$350</div><div class="metric-sub">USD/mes · GauchoCode</div></div>
+          <div class="metric"><div class="metric-label">Hosting nuevo</div><div class="metric-value">~$80</div><div class="metric-sub">USD/mes · DigitalOcean</div></div>
+          <div class="metric"><div class="metric-label">Ahorro mensual</div><div class="metric-value" style="color:var(--teal);">~$270</div><div class="metric-sub">USD/mes · desde mes 1</div></div>
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Situación actual vs propuesta · costos mensuales</div>
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="comp-table">
+            <thead>
+              <tr><th>Concepto</th><th>Con GauchoCode</th><th>Con equipo propio</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Hosting / servidor</td><td class="bad">$350 USD/mes</td><td class="good">~$80 USD/mes</td></tr>
+              <tr><td>Horas de soporte incluidas</td><td class="bad">5 hs/mes</td><td class="good" style="font-weight:600;">10 hs/mes · el doble ✓</td></tr>
+              <tr><td>Mantenimiento mensual (honorarios dev)</td><td class="neutral">Incluido en $350</td><td class="neutral">$450 – $550/mes (10 hs)</td></tr>
+              <tr><td>Costo total mensual estimado</td><td class="bad">$350+ (opaco)</td><td class="good">$530 – $630 (transparente)</td></tr>
+              <tr><td>QA independiente</td><td class="bad">No incluido</td><td class="good">Sí · factura aparte</td></tr>
+              <tr><td>Control del código</td><td class="bad">Depende de la agencia</td><td class="good">100% Estefania</td></tr>
+              <tr><td>Escalabilidad global</td><td class="bad">Servidores locales AR</td><td class="good">Multi-región desde el día 1</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div style="background:var(--bg2); border:1px solid var(--border); border-radius:10px; padding:0.875rem 1rem; margin-top:0.75rem; font-size:13px; color:var(--text2); line-height:1.6;">
+          💡 <strong style="color:var(--text);">Contexto:</strong> Estefania ya invirtió <strong style="color:var(--text);">$32.040 USD</strong> en el desarrollo original con GauchoCode. El objetivo de esta propuesta es recuperar el control total de ese activo con una migración de <strong style="color:var(--amber);">$2.500 – $3.500 USD</strong> (pago único), y hacerlo crecer con un equipo directo y dedicado.
+        </div>
+      </div>
+
+      <div class="section-gap">
+        <div class="section-title">Resumen de inversión total</div>
+        <div class="total-box">
+          <div class="total-row"><span class="total-label">Fase 1 · Migración completa (pago único)</span><span class="total-value">$2.500 – $3.500 USD</span></div>
+          <div class="total-row"><span class="total-label">Fase 2 · Mantenimiento mensual (desde mes 2)</span><span class="total-value">$450 – $550 USD/mes</span></div>
+          <div class="total-row"><span class="total-label">Servidor DigitalOcean (cargo directo Aura)</span><span class="total-value">~$40 – $80 USD/mes</span></div>
+          <div class="total-row"><span class="total-label">Herramientas de IA (a convenir)</span><span class="total-value">~$40 – $50 USD/mes</span></div>
+          <div class="total-row"><span class="total-label">Fase 3 · Nuevas features (cuando se requieran)</span><span class="total-value">$35 – $50 USD/hora</span></div>
+          <div class="total-row">
+            <span class="total-label" style="color:var(--text); font-weight:500;">Ahorro en hosting desde el mes 1</span>
+            <span class="total-value green" style="font-size:18px;">~$270 USD/mes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function showSection(name) {
+  document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('sec-' + name).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+</script>
+</body>
+</html>
